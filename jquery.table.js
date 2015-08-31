@@ -21,25 +21,10 @@
 				debug:false,
 				params:{},
 				url:"",
+				listeners:{},
 				success:function(){},
 				failure:function(){},
-				startAjax:function(){},
-				validadeField:function(field){ return true; },
-				alertError:function(msg){
-
-					if(typeof toastr === "object") toastr.error(msg);
-
-				},
-				alertSuccess:function(msg){
-
-					if(typeof toastr === "object") toastr.success(msg);
-
-				},
-				alertInfo:function(msg){
-
-					if(typeof toastr === "object") toastr.info(msg);
-
-				}
+				startAjax:function(){}
 			};
 				
 			var o =  $.extend(defaults, options);
@@ -59,6 +44,36 @@
 
 						var $tr = $(tplRow(row));
 
+						if (typeof o.listeners === 'object') {
+
+							for (var name in o.listeners) {
+
+								switch (name) {
+									case 'rowclick':
+									$tr.on('click', function(event){
+
+										if(
+											!$(event.target).hasClass('dropdown-toggle')
+											&&
+											!$(event.target).parents('.dropdown-toggle').length
+											&&
+											!$(event.target).parents('.dropdown-menu').length
+										) {
+
+											event.preventDefault();
+											event.stopPropagation();
+											o.listeners[name]($tr);
+
+										}
+
+									});
+									break;
+								}
+
+							}
+
+						}
+
 						$tbody.append($tr);
 
 					});
@@ -67,8 +82,11 @@
 
 				}
 
+				if (typeof o.startAjax === 'function') o.startAjax();
+
 				rest({
 					url:o.url,
+					params:o.params,
 					success:function(r){
 
 						render(r.data);
@@ -76,10 +94,12 @@
 					}
 				});
 				
-				if (o.btnreload) {
+				if ($(o.btnreload).length) {
 
 					$(o.btnreload).btnrest({
 						url:o.url,
+						params:o.params,
+						startAjax:o.startAjax,
 						success:function(r){
 							render(r.data);
 						}
