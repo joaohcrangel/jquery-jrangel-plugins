@@ -1,2 +1,1 @@
-# jquery-jrangel-plugins
-Plugins em jQuery
+# Plugins em jQuery
