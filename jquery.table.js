@@ -22,21 +22,42 @@
 				params:{},
 				url:"",
 				listeners:{},
+				tpl:'',
 				success:function(){},
 				failure:function(){},
 				startAjax:function(){}
 			};
-				
-			var o =  $.extend(defaults, options);
+			
+			var o =  $.extend({}, defaults, options);
 
     		return this.each(function() {
 
     			var t = this;
-				var $table = $(t), $tbody = $table.find('tbody'), tplRow = Handlebars.compile($(o.tpl).html());
+				var 
+					$table = $(t), 
+					$tbody = $table.find('tbody'), 
+					tplRow = Handlebars.compile($(o.tpl).html());
 
-				$table.block();
+				if (typeof $table.data().opts === 'objects') {
+					console.log('opts', $table.data().opts);
+					o = table.data().opts;
+				}
 
-				function render(data){
+				t.load = function(){
+
+					rest({
+						url:o.url,
+						params:o.params,
+						success:function(r){
+
+							t.render(r.data);
+
+						}
+					});
+
+				};
+
+				t.render = function(data){
 
 					$tbody.html('');
 
@@ -60,9 +81,28 @@
 											!$(event.target).parents('.dropdown-menu').length
 										) {
 
+											if(o.debug === true) console.log('rowclick', $tr);
+
 											event.preventDefault();
 											event.stopPropagation();
-											o.listeners[name]($tr);
+											o.listeners.rowclick($tr, event);
+											return false;
+
+										}
+
+									});
+									break;
+									case 'btnclick':
+									$tr.find('.btn, [role="menuitem"]').on('click', function(event){
+
+										if(!$(this).hasClass('dropdown-toggle')){
+
+											if(o.debug === true) console.log('btnclick', $tr);
+
+											event.preventDefault();
+											event.stopPropagation();
+											o.listeners.btnclick($tr, $(event.delegateTarget).data(), event);
+											return false;
 
 										}
 
@@ -82,17 +122,13 @@
 
 				}
 
+				$table.data('opts', o);
+
+				$table.block();
+
 				if (typeof o.startAjax === 'function') o.startAjax();
 
-				rest({
-					url:o.url,
-					params:o.params,
-					success:function(r){
-
-						render(r.data);
-
-					}
-				});
+				t.load();
 				
 				if ($(o.btnreload).length) {
 
@@ -101,11 +137,13 @@
 						params:o.params,
 						startAjax:o.startAjax,
 						success:function(r){
-							render(r.data);
+							t.render(r.data);
 						}
 					});
 
-				}
+				}				
+
+				$(t).data('instance', t);
 			
     		});
 
