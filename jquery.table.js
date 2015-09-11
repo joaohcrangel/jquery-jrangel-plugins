@@ -63,6 +63,15 @@
 
 					$.each(data, function(index, row){
 
+						if (typeof o.listeners === 'object' && typeof o.listeners.beforerender === 'function') {
+
+							var result = o.listeners.beforerender(t, row, index);
+							if (typeof result === 'object') {
+								row = result;
+							}
+
+						}	
+
 						var $tr = $(tplRow(row));
 
 						if (typeof o.listeners === 'object') {
@@ -118,6 +127,12 @@
 
 					});
 
+					if (typeof o.listeners === 'object' && typeof o.listeners.afterrender === 'function') {
+
+						o.listeners.afterrender(t, $tbody);
+
+					}
+
 					$table.unblock();
 
 				}
@@ -135,15 +150,23 @@
 					$(o.btnreload).btnrest({
 						url:o.url,
 						params:o.params,
-						startAjax:o.startAjax,
+						startAjax:function(){
+							$table.block();
+							if (typeof o.startAjax === 'function') o.startAjax();
+						},
 						success:function(r){
+							$table.unblock();
 							t.render(r.data);
+						},
+						failure:function(r){
+							$table.unblock();
+							if (typeof o.failure === 'function') o.failure();
 						}
 					});
 
 				}				
 
-				$(t).data('instance', t);
+				$(t).data('api', t);
 			
     		});
 
