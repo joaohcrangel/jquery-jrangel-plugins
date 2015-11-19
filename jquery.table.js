@@ -101,6 +101,17 @@
 
 									});
 									break;
+									case 'rowdblclick':
+									$tr.on('dblclick', function(event){
+
+										if(o.debug === true) console.log('rowdblclick', $tr);
+
+										event.preventDefault();
+										event.stopPropagation();
+										o.listeners.rowdblclick($tr, event);
+										return false;
+									});
+									break;
 									case 'btnclick':
 									$tr.find('.btn, [role="menuitem"]').on('click', function(event){
 
@@ -117,11 +128,60 @@
 
 									});
 									break;
+									case 'checkclick':
+
+										if ( typeof $.fn.iCheck == "function") {
+
+											$tr.find(':checkbox').on('ifChecked', function(){
+												o.listeners.checkclick($tr, row);
+											});
+
+										} else {
+
+											$tr.find('[type=checkbox]').on('change', function(){
+												if ( this.checked === true ) {
+													o.listeners.checkclick($tr, row);
+												}
+											});
+
+										}
+
+									break;
+									case 'uncheckclick':
+
+										if ( typeof $.fn.iCheck === "function") {
+
+											$tr.find(':checkbox').on('ifUnchecked', function(){
+												o.listeners.uncheckclick($tr, row);
+											});
+
+										} else {
+
+											$tr.find('[type=checkbox]').on('change', function(){
+												if ( this.checked === false ) {
+													o.listeners.uncheckclick($tr, row);
+												}
+											});
+
+										}
+
+									break;
 								}
 
 							}
 
 						}
+
+						if ( typeof $.fn.iCheck == "function" ) {
+
+							$tr.find('[type=checkbox]').iCheck({
+								checkboxClass: 'icheckbox_square',
+								radioClass: 'iradio_square',
+								increaseArea: '10%' // optional
+							});
+
+						}
+
 
 						$tbody.append($tr);
 

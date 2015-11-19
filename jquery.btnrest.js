@@ -26,7 +26,17 @@
 				success:function(r){},
 				failure:function(r){
 
-					alertify.error(r.error || "Não foi possível executar está ação. Tente novamente mais tarde.");
+					if (r.responseJSON) {
+						r = r.responseJSON;	
+					} else if(r.responseText) {
+						try{
+							r = $.parseJSON(r.responseText);
+						}catch(e){
+							r = {success:false, error:e.message};
+						}
+					}
+
+					alertify.alert(r.error || "Não foi possível executar está ação. Tente novamente mais tarde.").set('title', 'Erro');
 
 				}
 			};
@@ -48,12 +58,19 @@
 	    				$btn.btnload('load');
 
 		    			var success = o.success;
+		    			var failure = o.failure;
 
 		    			o.success = function(r){
 
 		    				$btn.btnload('unload');
-
 		    				success(r);
+
+		    			};
+
+		    			o.failure = function(r){
+
+		    				$btn.btnload('unload');
+		    				failure(r);
 
 		    			};
 
