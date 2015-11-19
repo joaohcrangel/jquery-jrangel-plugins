@@ -28,8 +28,8 @@
 				checked:false,
 				data:[],
                 listeners:{
-                    beforerenderitem:function(){},
-                    afterrenderitem:function(){},
+                    beforerenderitem:function(object){return object;},
+                    afterrenderitem:function(object){return object;},
                     check:function(){},
                     uncheck:function(){},
                     ready:function(){}
@@ -45,130 +45,145 @@
 				}
 				
                 var $select = $(this);
-    			var $selectFilter = $('<input class="input-hidden-focus" type="text" style="position:absolute; top:0; left:0; width:0; height:0; background: none; border: none; color: transparent; -webkit-appearance: none; -moz-appearance: none; appearance: none;">');
+                var $selectFilter = $('<input class="input-hidden-focus" type="text" style="position:absolute; top:0; left:0; width:0; height:0; background: none; border: none; color: transparent; -webkit-appearance: none; -moz-appearance: none; appearance: none;">');
                 var filterKey = [];
 
-    			$select.hide();
+                function initSelect(){
 
-    			if (o.debug === true) console.log('$select', $select);
+                    $select.hide();
 
-    			if (o.data.length > 0) {
+                    if (o.debug === true) console.log('$select', $select);
 
-    				if (o.debug === true) console.log('data', o.data);
+                    if (o.data.length > 0) {
 
-    				$.each(o.data, function(index, object){
+                        if (o.debug === true) console.log('data', o.data);
 
-    					var $option = $('<option/>');
+                        $.each(o.data, function(index, object){
 
-    					if (object.selected === true || object.checked === true) {
-    						$option.attr('selected', 'selected');
-    					}
+                            var $option = $('<option/>');
 
-    					if (!o.valueField) o.valueField = 'value';
-    					if (!o.displayField) o.displayField = 'text';
+                            if (object.selected === true || object.checked === true) {
+                                $option.attr('selected', 'selected');
+                            }
 
-    					$option.attr('value', object[o.valueField]);
-    					$option.attr('data-'+o.displayField, object[o.displayField]);
-                        $option.attr('data-'+o.valueField, object[o.valueField]);
-                        $option.attr('data-vltotal', object.vltotal);
-    					$option.attr('data-ch', object.QtCargaHoraria);
-                        $option.data(object);
-    					$option.text(object[o.displayField]);
+                            if (!o.valueField) o.valueField = 'value';
+                            if (!o.displayField) o.displayField = 'text';
 
-    					$select.append($option);
+                            $option.attr('value', object[o.valueField]);
+                            $option.attr('data-'+o.displayField, object[o.displayField]);
+                            $option.attr('data-'+o.valueField, object[o.valueField]);
+                            $option.attr('data-vltotal', object.vltotal);
+                            $option.attr('data-ch', object.QtCargaHoraria);
+                            $option.data(object);
+                            $option.text(object[o.displayField]);
 
-    				});
+                            $select.append($option);
 
-    			}
+                        });
 
-    			o.data = [];
-
-    			$select.find('option').each(function(index, element){
-
-    				o.data.push($.extend($(element).data(), {
-    					value:$(element).text(),
-    					selected:($(element).attr('selected'))?true:false
-    				}));
-
-    			});
-
-    			$select.wrap('<div class="jrangel-combo"></div>');
-
-    			var $container = $select.parents('.jrangel-combo');
-                var $containerParent = $container.parents(':first');
-
-                $containerParent.addClass('overflow-auto');
-    			$container.append('<ul class="list-group"></ul>');
-
-				$.each(o.data, function(index, object){
-
-                    if (o.debug === true) console.log('object', object);
-
-                    if (typeof o.listeners.beforerenderitem === 'function') {
-                        object = o.listeners.beforerenderitem(object, index);
                     }
 
-                    if (o.displayField && typeof object[o.displayField] !== 'undefined') object.displayField = object[o.displayField];
-                    if (o.valueField && typeof object[o.valueField] !== 'undefined') object.valueField = object[o.valueField];
+                    o.data = [];
 
-                    var template = Handlebars.compile((o.tpl)?$(o.tpl).html():o.tplHTML);
-                    var $li = $(template(object));
+                    $select.find('option').each(function(index, element){
 
-                    $li.data('dados', object);
+                        o.data.push($.extend($(element).data(), {
+                            value:$(element).text(),
+                            selected:($(element).attr('selected'))?true:false
+                        }));
 
-                    $container.find("ul").append($li);
+                    });
 
-                    if (typeof o.listeners.afterrenderitem === 'function') {
-                        o.listeners.afterrenderitem(object, index, $li);
-                    }
+                   
 
-				});
+                    $select.wrap('<div class="jrangel-combo"></div>');
 
-				if (typeof $.fn.iCheck === 'function') {
+                    var $container = $select.parents('.jrangel-combo');
+                    var $containerParent = $container.parents(':first');
 
-					$container.find(':checkbox').iCheck({
-						checkboxClass: 'icheckbox_square',
-						radioClass: 'iradio_square',
-						increaseArea: '10%'
-					});
+                    $containerParent.addClass('overflow-auto');
+                    $container.append('<ul class="list-group"></ul>');
 
-                    for ( var x in o.listeners ) {
-                        switch(x){
-                            case 'check':
-                                if (typeof o.listeners[x] === 'function') {
-                                    $container.find(':checkbox').on('ifChecked',function (){
-                                        o.listeners.check(this, $(this).closest('li').data());
-                                    });
-                                }
-                                break;
-                            case 'uncheck':
-                                if (typeof o.listeners[x] === 'function') {
-                                    $container.find(':checkbox').on('ifUnchecked',function (){
-                                        o.listeners.uncheck(this, $(this).closest('li').data());
-                                    });
-                                }
-                                break;
+                    $.each(o.data, function(index, object){
+
+                        if (o.debug === true) console.log('object', object);
+
+                        if (typeof o.listeners.beforerenderitem === 'function') {
+                            object = o.listeners.beforerenderitem(object, index);
                         }
+
+                        if (o.displayField && typeof object[o.displayField] !== 'undefined') object.displayField = object[o.displayField];
+                        if (o.valueField && typeof object[o.valueField] !== 'undefined') object.valueField = object[o.valueField];
+
+                        var template = Handlebars.compile((o.tpl)?$(o.tpl).html():o.tplHTML);
+                        var $li = $(template(object));
+
+                        $li.data('dados', object);
+
+                        $container.find("ul").append($li);
+
+                        if (typeof o.listeners.afterrenderitem === 'function') {
+                            o.listeners.afterrenderitem(object, index, $li);
+                        }
+
+                    });
+
+                     if (o.checked === false) {
+
+                        $select.show();
+                        $containerParent.find('.list-group').remove();
+
+                    } else {
+
+                        if (typeof $.fn.iCheck === 'function') {
+
+                            $container.find(':checkbox').iCheck({
+                                checkboxClass: 'icheckbox_square',
+                                radioClass: 'iradio_square',
+                                increaseArea: '10%'
+                            });
+
+                            for ( var x in o.listeners ) {
+                                switch(x){
+                                    case 'check':
+                                        if (typeof o.listeners[x] === 'function') {
+                                            $container.find(':checkbox').on('ifChecked',function (){
+                                                o.listeners.check(this, $(this).closest('li').data());
+                                            });
+                                        }
+                                        break;
+                                    case 'uncheck':
+                                        if (typeof o.listeners[x] === 'function') {
+                                            $container.find(':checkbox').on('ifUnchecked',function (){
+                                                o.listeners.uncheck(this, $(this).closest('li').data());
+                                            });
+                                        }
+                                        break;
+                                }
+                            }
+                            
+                            $container.find(':checkbox').on('ifChanged', function(event, a){
+
+                                var $li = $(this).parents('li');
+                                $li.trigger('click');
+
+                            });
+
+                            $container.find('li').on('click', function(){
+
+                                $container.find('li.active').removeClass('active');
+                                $(this).toggleClass('active');
+                                $selectFilter.focus();
+
+                                if (typeof o.listeners.select == "function" ) o.listeners.select(this, $(this).closest('li').data());
+
+                            });
+
+                        }
+
                     }
-                    
-                    $container.find(':checkbox').on('ifChanged', function(event, a){
 
-                        var $li = $(this).parents('li');
-                        $li.trigger('click');
-
-                    });
-
-                    $container.find('li').on('click', function(){
-
-                        $container.find('li.active').removeClass('active');
-                        $(this).toggleClass('active');
-                        $selectFilter.focus();
-
-                        if (typeof o.listeners.select == "function" ) o.listeners.select(this, $(this).closest('li').data());
-
-                    });
-
-				}
+                }
 
                 var timerCheckFilter;
 
@@ -220,85 +235,37 @@
 
                 }
 
-                $selectFilter.appendTo('body');
+                function initEvents(){
 
-                $selectFilter.on('keyup', function(event){
+                    $selectFilter.appendTo('body');
 
-                    var filterKeyNew = [];
+                    $selectFilter.on('keyup', function(event){
 
-                    $.each(filterKey, function(index, item){
-                        if (index > 0) {
-                            var ts = filterKey[index-1].timeStamp;
-                        } else {
-                            var ts = new Date().getTime();
-                        }
-                        if (ts - item.timeStamp <= 1000) {
-                            filterKeyNew.push(item);
-                        }
+                        var filterKeyNew = [];
+
+                        $.each(filterKey, function(index, item){
+                            if (index > 0) {
+                                var ts = filterKey[index-1].timeStamp;
+                            } else {
+                                var ts = new Date().getTime();
+                            }
+                            if (ts - item.timeStamp <= 1000) {
+                                filterKeyNew.push(item);
+                            }
+                        });
+
+                        filterKey = filterKeyNew;
+
+                        filterKey.push({
+                            value:String.fromCharCode(event.keyCode),
+                            timeStamp:event.timeStamp
+                        });
+
+                        setTimerCheckFilter();
+
                     });
-
-                    filterKey = filterKeyNew;
-
-                    filterKey.push({
-                        value:String.fromCharCode(event.keyCode),
-                        timeStamp:event.timeStamp
-                    });
-
-                    setTimerCheckFilter();
-
-                });
-
-                /*
-                $(window).on('keydown', function(event){
-
-                    if (!$(event.target).hasClass('input-hidden-focus')) {
-                        return false;
-                    }
-
-                    if ($container.filter(":visible").length > 0 && [32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
-
-                        var $li = $container.find('li.active');
-
-                        if (!$li.length) {
-                            $container.find('li:first').addClass('active');
-                            $li = $container.find('li.active');
-                        }
-
-                        event.stopPropagation();
-                        event.preventDefault();
-
-                        switch (event.keyCode) {
-
-                            case 32://SPACE
-                            $li.find(':checkbox').iCheck('toggle');
-                            break;
-                            case 37://LEFT
-                            
-                            break;
-                            case 38://UP
-                            var $li = $li.prev('li');
-                            $li.trigger('click');
-                            $containerParent.scrollTop($li.prop('offsetTop'));
-                            break;
-                            case 39://RIGHT
-                            
-                            break;
-                            case 40://BOTTOM
-                            var $li = $li.next('li');
-                            $li.trigger('click');
-                            $containerParent.scrollTop($li.prop('offsetTop'));
-                            break;
-
-                        }
-
-                        return false;
-
-                    }
-
-                });
-                */
-                
-                for ( var x in o.listeners ) {
+                    
+                    for ( var x in o.listeners ) {
                         switch(x){
                             case 'ready':
                             if (typeof o.listeners[x] === 'function') {
@@ -306,7 +273,41 @@
                             }
                                 break;
                         }
+                    }
+
                 }
+
+                (function init(){
+                    
+                    initEvents();
+
+                    if (o.data.length > 0) {
+
+                        initSelect();
+
+                    } else if(o.url.length) {
+
+                        $.store({
+                            url:o.url,
+                            success:function(data){
+                                
+                                o.data = data;
+                                console.log('ajax', data);
+                                initSelect();
+
+                            },
+                            failure:function(err){
+
+                                if (typeof o.failure === 'function') o.failure(err);
+
+                            }
+                        });
+
+                        initSelect();
+
+                    }                    
+
+                }());
                 			
     		});
     		
