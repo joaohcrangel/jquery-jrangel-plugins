@@ -80,6 +80,7 @@ $.store = (function(){
 					rest($.extend({}, o, {
 						success:function(r){
 
+							o.chace = true;
 							t.setItem(key, r.data);
 							t.getItem(key);
 
