@@ -15,7 +15,9 @@ $.store = (function(){
 
 		return new (function(options){
 
+			var tryRest = 0;
 			var t = this, defaults = {
+				debug:false,
 				keyStorage:'sessionStore',
 				cache:true,
 				url:'',
@@ -69,22 +71,38 @@ $.store = (function(){
 
 				var data = t.getStorage();
 
-				//console.log('getItem', data);
+				if (o.debug === true) console.log('data', data);
+				if (o.debug === true) console.log('data[key]', key, data[key]);
 
 				if (o.cache === true && data[key]) {
+
+					if (o.debug === true) console.log('cache OK');
 
 					if (typeof o.success === 'function') o.success(data[key]);
 
 				} else {
 
+					if (o.debug === true) console.log('Loading...');
+
+					if (tryRest >= 3) {
+						console.error('Não foi possível carregar o store após '+tryRest+' tentativas.');
+						return true;
+					}
+
+					tryRest++;
+
 					rest($.extend({}, o, {
 						success:function(r){
 
+							if (o.debug === true) console.log('store rest success', r);
+
+							o.cache = true;
 							t.setItem(key, r.data);
 							t.getItem(key);
 
 						},
 						failure:function(r){
+							if (o.debug === true) console.log('store rest error', r);
 							if (typeof o.failure === 'function') o.failure(r.error || "A chave "+key+" nÃ£o existe.");
 						}
 					}));
