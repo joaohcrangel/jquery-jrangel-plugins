@@ -97,6 +97,7 @@ $.store = (function(){
 							if (o.debug === true) console.log('store rest success', r);
 
 							o.cache = true;
+
 							t.setItem(key, r.data);
 							t.getItem(key);
 
