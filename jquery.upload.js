@@ -118,3 +118,41 @@
 	});
 	
 })(jQuery);
+$.upload = (function(){
+	
+	return function(options){
+
+		return new (function(options){
+
+			var tryRest = 0;
+			var t = this, defaults = {
+				debug:false,
+				url:'',
+				autoOpen:true,
+				multiple:false,
+				accept:"image/*",
+				inputName:"arquivo",
+				success:function(){},
+				failure:function(r){System.showError(r);}
+			};
+
+			var o =  $.extend(defaults, options);
+
+			var $inputFile = $('<input type="file" name="'+o.inputName+'" accept="'+o.accept+'">');
+
+			if (o.multiple === true) {
+				$inputFile.attr("multiple", "multiple");
+			}
+
+			$inputFile.upload(o);
+
+			var api = $inputFile.data('api');
+
+			console.log(api);
+
+
+		})(options);
+
+	};
+
+})();

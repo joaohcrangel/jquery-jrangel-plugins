@@ -10,16 +10,20 @@
  * 
  */
 function rest(opts){
-
-    var opts = $.extend({}, {
+    
+    opts = $.extend({}, {
     	debug:false,
-        method:'GET',
-        data:$.param({}),
-        success:function(){},
-        failure:function(){},
-        dataType:'json',
-        $http:null
+      method:'GET',
+      data:$.param({}),
+      beforeSend:function(){ if (System && typeof System.loadHeader === 'function') System.loadHeader(); },
+      complete:function(){ if (System && typeof System.doneHeader === 'function') System.doneHeader(); },
+      success:function(){},
+      failure:function(){},
+      dataType:'json',
+      $http:null
     }, opts || {});
+  
+  if (!window.setTimeoutRest) window.setTimeoutRest = {};
 
     switch (opts.method) {
 
@@ -36,38 +40,89 @@ function rest(opts){
     var success = opts.success;
     var failure = opts.failure;
 
-    if (typeof opts.$http === 'function') {
-    	if (opts.debug === true) console.log('AJAX WITH', '$http');
-        opts.headers = { 
-            'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        opts.data = $.param(opts.data);
-    	opts.$http(opts).then(function(r){
-    		if (typeof opts.success === 'function') opts.success(r.data, r);
-    	}, opts.failure);
-    } else {
+    if (typeof System === 'object' && System.ajaxExecution === true) {
 
-    	if (opts.debug === true) console.log('AJAX WITH', '$.ajax');
-        
-        opts.success = function(r){
-
-            success(r);
-
-        };
-
-        opts.failure = function(r){
-
-            if (opts.debug === true) console.log('AJAX failure', r);
-
-            if (typeof r.responseJSON === 'object') {
-                failure(r.responseJSON, r);
-            } else {
-                failure({success:false}, r);
+        console.warn('Aguardando conclusão de execução em andamento...');
+        window.setTimeoutRest[opts.url] = setTimeout(function(){
+            if (window.setTimeoutRest[opts.url]) {
+              clearTimeout(window.setTimeoutRest[opts.url]);
+              window.setTimeoutRest[opts.url] = undefined;
             }
+            rest(opts);
+        }, 10000);
 
-        };
-        
-    	return $.ajax(opts).fail(opts.failure);
-    }    
+        return false;
+
+    } else {
+      
+      if (typeof System === 'object') System.ajaxExecution = true;
+
+      if (typeof opts.$http === 'function') {
+        if (opts.debug === true) console.log('AJAX WITH', '$http');
+          opts.headers = { 
+              'Content-Type': 'application/x-www-form-urlencoded'
+          };
+          opts.data = $.param(opts.data);
+        opts.$http(opts).then(function(r){
+          if (window.setTimeoutRest[opts.url]) {
+            clearTimeout(window.setTimeoutRest[opts.url]);
+            window.setTimeoutRest[opts.url] = undefined;
+          }
+          if (typeof System === 'object') System.ajaxExecution = false;
+          if (typeof opts.success === 'function') opts.success(r.data, r);
+        }, opts.failure);
+      } else {
+
+        if (opts.debug === true) console.log('AJAX WITH', '$.ajax');
+          
+          opts.success = function(r){
+            
+              if (window.setTimeoutRest[opts.url]) {
+                clearTimeout(window.setTimeoutRest[opts.url]);
+                window.setTimeoutRest[opts.url] = undefined;
+              }
+
+              if (typeof System === 'object') System.ajaxExecution = false;
+              success(r);
+
+          };
+
+          opts.failure = function(r){
+            
+              if (window.setTimeoutRest[opts.url]) {
+                clearTimeout(window.setTimeoutRest[opts.url]);
+                window.setTimeoutRest[opts.url] = undefined;
+              }
+
+              if (typeof System === 'object') System.ajaxExecution = false;
+
+              if (opts.debug === true) console.log('AJAX failure', r);
+
+              if (typeof r.responseJSON === 'object') {
+                  if (r.responseJSON.errorCode === 403 && System && System.showLogin === 'function') {
+                    System.showLogin({
+                      success:function(r){
+                        rest(opts);
+                      }
+                    });
+                  }
+                  failure(r.responseJSON, r);
+              } else {
+                  if (r.errorCode === 403 && System && System.showLogin === 'function') {
+                    System.showLogin({
+                      success:function(r){
+                        rest(opts);
+                      }
+                    });
+                  }
+                  failure({success:false}, r);
+              }
+
+          };
+
+        return $.ajax(opts).fail(opts.failure);
+      }   
+      
+    }   
 
 };

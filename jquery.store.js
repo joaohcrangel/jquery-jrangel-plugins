@@ -28,7 +28,32 @@ $.store = (function(){
 
 			var o =  $.extend(defaults, options);
 
-			if (!typeof sessionStorage === 'object') console.warn('O navegador nÃ£o suporte sessionStorage.');
+			if (!typeof sessionStorage === 'object') console.warn('O navegador não suporte sessionStorage.');
+
+			t.clear = function(keys) {
+
+				var store = t.getStorage();
+
+				if (typeof keys === 'string') keys = keys.split(",");
+
+				$.each(keys, function(index, key){
+
+					if (store[key]) {
+						store[key] = [];
+						delete store[key];
+					}
+
+				});
+
+				return t.setStorage(store);
+
+			};
+
+			t.clearAll = function() {
+
+				return t.setStorage({});
+
+			};
 
 			t.setItem = function(key, data) {
 
@@ -97,7 +122,6 @@ $.store = (function(){
 							if (o.debug === true) console.log('store rest success', r);
 
 							o.cache = true;
-
 							t.setItem(key, r.data);
 							t.getItem(key);
 

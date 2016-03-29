@@ -27,22 +27,22 @@
 				parentCls:"form-group",
 				errorCls:"has-error",
 				success:function(){},
-				failure:function(){},
+				failure:function(r){ System.showError(r); },
 				startAjax:function(){},
 				validadeField:function(field){ return true; },
 				alertError:function(msg){
 
-					if(typeof toastr === "object") toastr.error(msg);
+					
 
 				},
 				alertSuccess:function(msg){
 
-					if(typeof toastr === "object") toastr.success(msg);
+					
 
 				},
 				alertInfo:function(msg){
 
-					if(typeof toastr === "object") toastr.info(msg);
+					
 
 				}
 			};
