@@ -19,6 +19,7 @@
             //Set the default values, use comma to separate the settings, example:
             var defaults = {
                 debug:false,
+                method:'GET',
                 cache:true,
                 valueField:'',
                 displayField:'',
@@ -82,6 +83,7 @@
                 };
                 
                 $.store({
+                    method:o.method,
                     url:o.url,
                     cache:o.cache,
                     success:function(data){
@@ -97,6 +99,7 @@
                                 $el.html('<option desabled selected>Atualizando...</option>');
                                 
                                 $.store({
+                                    method:o.method,
                                     url:o.url,
                                     cache:false,
                                     success:function(data){
