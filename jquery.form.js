@@ -13,6 +13,54 @@
 
  	$.fn.extend({ 
  		
+ 		formLoad:function(data) {
+
+ 			var t = this;
+			var $form = $(t);
+
+ 			for (var item in data) {
+
+ 				var $element = $form.find('[name="'+item+'"]'), 
+ 					element = $element[0];
+
+ 				if ($element.length === 1) {
+
+	 				switch (element.tagName.toLowerCase()) {
+	 					case 'input':
+	 					switch (element.type.toLowerCase()) {
+	 						case 'radio':
+	 						case 'checkbox':
+	 						$element.attr('checked', 'checked').val(data[item]);
+	 						break;
+	 						default:
+	 						$element.val(data[item]);
+	 						break;
+	 					}
+	 					break;
+
+	 					case 'select':
+	 					$element.find(':selected').removeAttr('selected');
+	 					$element.find('[value="'+data[item]+'"]').attr('selected', 'selected');
+	 					break;
+
+	 					case 'textarea':
+	 					$element.html(data[item]);
+	 					break;
+	 				}
+
+	 			} else if($element.length > 1) {
+
+	 				$element.removeAttr('checked');
+	 				$element.filter('[value="'+data[item]+'"]').attr('checked', 'checked');
+
+	 			}
+
+ 			}
+
+ 			return true;
+
+ 		},
+
 		//pass the options variable to the function
  		form: function(options) {
 
