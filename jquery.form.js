@@ -220,7 +220,7 @@
 								if(typeof o.success === "function") o.success(response);
 
 								if(o.resetForm === true){
-									$form.find('[name]').each(function(){
+									$form.find('[name]:not([data-no-reset-form])').each(function(){
 	
 										$(this).val('');
 	
