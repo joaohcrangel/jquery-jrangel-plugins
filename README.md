@@ -1,5 +1,5 @@
-# JRangel jQuery Plug-ins
-Estes plug-ins agilizam no uso de formulários HTML e componentes usados com certa frequência. É um casamento perfeito com página HTML que usam Bootstrap e solicitações Ajax que respondam JSON. São eles:
+# JRangel jQuery plugins
+Estes plugins agilizam no uso de formulários HTML e componentes usados com certa frequência. É um casamento perfeito com página HTML que usam Bootstrap e solicitações Ajax que respondam JSON. São eles:
 
   - Core
   - Btn Load
@@ -13,7 +13,7 @@ Estes plug-ins agilizam no uso de formulários HTML e componentes usados com cer
 
 Requer [jQuery.js](https://nodejs.org/) v1.7+ para rodar.
 
-Em seu arquivo HTML precisa incluir os arquivos na ordem correta, ou incluir o arquivo `jrangel.all.js` que contém todos os plug-ins.
+Em seu arquivo HTML precisa incluir os arquivos na ordem correta, ou incluir o arquivo `jrangel.all.js` que contém todos os plugins.
 
 Exemplo:
 
@@ -22,7 +22,7 @@ Exemplo:
 <script src="jrangel.all.js"></script>
 ```
 
-Ou usando plug-ins específicos.
+Ou usando plugins específicos.
 
 ```sh
 <script src="jquery.min.js"></script>
