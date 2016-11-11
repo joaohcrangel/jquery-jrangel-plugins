@@ -128,7 +128,7 @@ $.store = (function(){
 						},
 						failure:function(r){
 							if (o.debug === true) console.log('store rest error', r);
-							if (typeof o.failure === 'function') o.failure(r.error || "A chave "+key+" nÃ£o existe.");
+							if (typeof o.failure === 'function') o.failure(r.error || "A chave "+key+" não existe.");
 						}
 					}));
 

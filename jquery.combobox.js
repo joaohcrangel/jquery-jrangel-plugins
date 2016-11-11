@@ -7,12 +7,12 @@
  * @license MIT License - http://www.opensource.org/licenses/mit-license.php
  *
  * For usage and examples, buy TopSundue:
- * 
+ *
  */
 (function($){
 
-    $.fn.extend({ 
-        
+    $.fn.extend({
+
         //pass the options variable to the function
         combobox: function(options) {
 
@@ -24,7 +24,8 @@
                 valueField:'',
                 displayField:'',
                 url:'',
-                value:undefined
+                value:undefined,
+                emptyText:'-- selecione --'
             };
 
             var o =  $.extend(defaults, options);
@@ -36,9 +37,9 @@
                 var $el = $(this);
 
                 if (o.debug === true) console.log('element', this);
-                
+
                 var successCombo = function(o, $el, data){
-                    
+
                     if (o.debug === true) console.log('success', data);
 
                     $el.html('');
@@ -59,29 +60,31 @@
                     });
 
                     if (o.debug === true) console.log('value', o.value);
-                    
+
                     $el.find(":selected").removeAttr("selected");
 
                     if (o.value !== undefined) {
-                        
-                        $el.find("[value='"+o.value+"']").attr("selected", "selected").trigger("change");
-                        
+
+                        $el.find("[value="+o.value+"]").attr('selected', 'selected').trigger("change");
+
                     } else if ($el.data('value') !== undefined) {
 
-                        $el.find("[value='"+$el.data('value')+"']").attr("selected", "selected").trigger("change");
-                        
+                        $el.find("[value="+$el.data('value')+"]").attr('selected', 'selected').trigger("change");
+
                     } else {
-                        
-                        $el.prepend('<option selected disabled value=""> -- selecione -- </option>');
-                        
+
+                        $el.prepend('<option selected disabled value=""> '+o.emptyText+' </option>');
+
                     }
+
+                    setTimeout(function(){$el.find('[selected]').prop('selected', true);},0);
 
                     if (typeof o.success === 'function') {
                         o.success($el, data);
                     }
-                    
+
                 };
-                
+
                 $.store({
                     method:o.method,
                     url:o.url,
@@ -93,11 +96,23 @@
                             if (typeof o.success === 'function') {
                                     o.success($el, data);
                             }
-                        
+
+                            $el.on("contextmenu", function(){
+
+                              $el.find(":selected").prop('selected', false);
+                              var $disabled = $el.find(":disabled");
+                              $disabled.prop({
+                                'disabled':false,
+                                'selected':true
+                              });
+                              $disabled.prop('disabled', true);                              
+
+                            });
+
                             $el.on("dblclick", function(){
-                                
+
                                 $el.html('<option desabled selected>Atualizando...</option>');
-                                
+
                                 $.store({
                                     method:o.method,
                                     url:o.url,
@@ -112,15 +127,15 @@
 
                                     }
                                 });
-                                
+
                             });
 
                     }
                 });
-                            
+
             });
-            
+
         }
     });
-    
+
 })(jQuery);

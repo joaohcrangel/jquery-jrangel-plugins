@@ -148,8 +148,7 @@ $.upload = (function(){
 
 			var api = $inputFile.data('api');
 
-			console.log(api);
-
+			return api;
 
 		})(options);
 

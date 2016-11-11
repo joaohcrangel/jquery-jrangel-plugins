@@ -7,12 +7,33 @@
  * @license MIT License - http://www.opensource.org/licenses/mit-license.php
  *
  * For usage and examples, buy TopSundue:
- * 
+ *
  */
 (function($){
 
- 	$.fn.extend({ 
- 		
+ 	$.fn.extend({
+
+ 		formValues:function() {
+
+ 			var t = this,
+ 				$form = $(t);
+
+ 			t.data = {};
+
+			$.each($form.serializeArray(), function(){
+
+				if(this.name.indexOf("[]") === -1) t.data[this.name] = this.value;
+
+			});
+
+			$form.find(".select2-container").each(function(){
+				t.data[$(this).next("select").attr("name")] = $(this).next("select").select2("val");
+			});
+
+			return t.data;
+
+ 		},
+
  		formLoad:function(data) {
 
  			var t = this;
@@ -20,18 +41,20 @@
 
  			for (var item in data) {
 
- 				var $element = $form.find('[name="'+item+'"]'), 
+ 				var $element = $form.find('[name="'+item+'"]'),
  					element = $element[0];
 
  				if ($element.length === 1) {
 
 	 				switch (element.tagName.toLowerCase()) {
+
 	 					case 'input':
 	 					switch (element.type.toLowerCase()) {
 	 						case 'radio':
 	 						case 'checkbox':
-	 						$element.attr('checked', 'checked').val(data[item]);
+	 						$element.prop('checked', true).val(data[item]);
 	 						break;
+
 	 						default:
 	 						$element.val(data[item]);
 	 						break;
@@ -39,22 +62,35 @@
 	 					break;
 
 	 					case 'select':
-	 					$element.find(':selected').removeAttr('selected');
-	 					$element.find('[value="'+data[item]+'"]').attr('selected', 'selected');
+	 					$element.find(':selected').removeAttr('selected').prop('selected', false);
+	 					if (data[item]) {
+                $element.find('[value='+data[item]+']').attr('selected', 'selected').prop('selected', true);
+            } else {
+              $element.find(':disabled').removeAttr('disabled').prop('selected', true).prop('disabled', true);
+            }
 	 					break;
 
 	 					case 'textarea':
 	 					$element.html(data[item]);
 	 					break;
+
 	 				}
 
 	 			} else if($element.length > 1) {
 
-	 				$element.removeAttr('checked');
-	 				$element.filter('[value="'+data[item]+'"]').attr('checked', 'checked');
+	 				$element.removeAttr('checked').prop('checked', false);
+	 				if (data[item]) {
+            $element.filter('[value='+data[item]+']').attr('checked', 'checked').prop('checked', true);
+          } else {
+            $element.find(':disabled').removeAttr('disabled').prop('selected', true).prop('disabled', true);
+          }
 
 	 			}
 
+ 			}
+
+ 			if ($.components !== undefined) {
+ 				$.components.init('iCheck');
  			}
 
  			return true;
@@ -66,7 +102,7 @@
 
 			//Set the default values, use comma to separate the settings, example:
 			var defaults = {
-				debug:false,
+				debug:true,
 				params:{},
 				url:"",
 				method:"POST",
@@ -80,21 +116,21 @@
 				validadeField:function(field){ return true; },
 				alertError:function(msg){
 
-					
+
 
 				},
 				alertSuccess:function(msg){
 
-					
+
 
 				},
 				alertInfo:function(msg){
 
-					
+
 
 				}
 			};
-				
+
 			var o =  $.extend(defaults, options);
 
     		return this.each(function() {
@@ -111,7 +147,7 @@
 				if(o.debug === true) console.info("options", o);
 
 				$btn.on("click", function(e){
-					
+
 					if(o.debug === true) console.info("click", e);
 
 					e.preventDefault();
@@ -126,7 +162,7 @@
 
 							if(o.debug === true) console.info("validade field", this);
 							$(this).closest("."+o.parentCls).addClass(o.errorCls);
-							
+
 						}
 
 					});
@@ -183,11 +219,17 @@
 							t.data[$(this).next("select").attr("name")] = $(this).next("select").select2("val");
 						});
 
-						if(o.debug === true) console.info("data", t.data);
+						if(o.debug === true) console.info("data 1", t.data);
 
 						if(typeof o.startAjax === "function") o.startAjax(t.data);
 
+						if (typeof o.beforeParams === 'function') t.data =  $.extend({}, o.beforeParams(t.data), t.data);
+
+            if(o.debug === true) console.info("data 2", t.data);
+
 						var data = $.param(t.data);
+
+            if(o.debug === true) console.info("data 3", data);
 
 						var datas = [];
 						$form.find("[name*='[]']").each(function(){
@@ -200,74 +242,47 @@
 
 						data += datas.join("&");
 
-						var request = $.ajax({
-							url: o.url,
-							type: o.method,
+            if(o.debug === true) console.info("data 4", data);
+
+            rest({
+              $http: o.$http,
+              url: o.url,
+							method: o.method,
 							data: data,
-							dataType: o.dataType
-						});
+              success:function(r) {
 
-						if(o.debug === true) console.info("request", request);
-						 
-						request.done(function( response ) {
-							
-							if(o.debug === true) console.info("done", response);
-
-							if(typeof response === "string") response = $.parseJSON(response);
-
-							if(response.success){
-
-								if(typeof o.success === "function") o.success(response);
+                $btn.btnload("unload");
+                if(typeof o.success === "function") o.success(r);
 
 								if(o.resetForm === true){
 									$form.find('[name]:not([data-no-reset-form])').each(function(){
-	
+
 										$(this).val('');
-	
+
 									});
 								}
 
 								o.alertSuccess("Formulário enviado com sucesso!");
 
-								if(o.debug === true) console.info("success", response);
+								if(o.debug === true) console.info("success", r);
 
-							}else{
+              },
+              failure:function(e) {
 
-								if(typeof o.failure === "function") o.failure(response);
+  							$btn.btnload("unload");
+                if(typeof o.failure === "function") o.failure(e);
 
-								o.alertError(response.error || "Tente novamente mais tarde.");
-
-								if(o.debug === true) console.info("failure", response);
-
-							}
-
-							$btn.btnload("unload");
-
-						});
-						 
-						request.fail(function( jqXHR, textStatus ) {
-
-							if(o.debug === true) console.info("fail", jqXHR, textStatus);
-
-							$btn.btnload("unload");
-
-							if(typeof o.failure === "function") o.failure({
-								success:false,
-								error:(typeof jqXHR.responseJSON === 'object' && jqXHR.responseJSON.error)?jqXHR.responseJSON.error:"Não foi possível concluir o envio. Tente novamente mais tarde."
-							});
-							
-							o.alertError(((typeof jqXHR.responseJSON === 'object' && jqXHR.responseJSON.error)?jqXHR.responseJSON.error:"Não foi possível concluir o envio. Tente novamente mais tarde."));
-
-						});
+              }
+            });
 
 					}
 
 					return false;
 
 				});
-			
+
     		});
     	}
 	});
-	
+
 })(jQuery);
