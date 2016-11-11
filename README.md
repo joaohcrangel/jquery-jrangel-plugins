@@ -18,14 +18,14 @@ Em seu arquivo HTML precisa incluir os arquivos na ordem correta, ou incluir o a
 Exemplo:
 
 ```sh
-$ <script src="jquery.min.js"></script>
-$ <script src="jrangel.all.js"></script>
+<script src="jquery.min.js"></script>
+<script src="jrangel.all.js"></script>
 ```
 
 Ou usando plug-ins específicos.
 
 ```sh
-$ <script src="jquery.min.js"></script>
-$ <script src="jquery.core.js"></script>
-$ <script src="jquery.btnload.js"></script>
+<script src="jquery.min.js"></script>
+<script src="jquery.core.js"></script>
+<script src="jquery.btnload.js"></script>
 ```
